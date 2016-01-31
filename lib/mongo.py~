@@ -1,0 +1,7 @@
+from pymongo import MongoClient
+
+def connect(db):
+    s =  'mongodb://localhost:27017/'
+    print "=> Starting %s" % s
+    client = MongoClient(s)
+    return client[db]

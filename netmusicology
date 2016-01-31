@@ -1,0 +1,54 @@
+#!/usr/bin/python
+
+import sys
+sys.path.append("./lib") # this is where your python file exists
+from youtube_tools import yt, write, markdown
+from netnographydb import connect 
+from optparse import OptionParser
+import re
+import json
+
+
+# PROGRAMA PRINCIPAL
+PROG = "netmusicology"
+VERSION = "0.0.1"
+description = "For computer assisted musicology\n\s\s-youtube"
+parser = OptionParser(usage='usage: %prog [OPTIONS, [ARGS]]',
+                          version='%s %s' % (PROG, VERSION),
+                          description=description)
+
+# Opcoes do programa
+opt =  [("y", "youtube", "store_true", "Search in youtube for words and crete some database for it"),
+        ("q", "query", None, "Search in youtube for words and crete some database for it"),
+        ("r", "read-database", "store_true", "read collected information")]
+
+
+# Create a list of tuples
+# to create a list of options
+for word in opt:
+    v = "_".join(word[1].split("-"))
+    a = "-%s" % word[0]
+    b = "--%s" % word[1]
+    if word[2] != None:
+        parser.add_option(a, b, action=word[2], help=word[3], dest=v, default=False)
+    else:
+    	parser.add_option(a, b, help=word[3], dest=v, default=False)
+# Now execute
+(options, args) = parser.parse_args()
+
+if(options.youtube):
+    if(options.query):
+        col = connect("netnography", options.query)
+        yt(options.question, (lambda doc: col.insert_one(doc)))
+        print "=> DONE"
+
+    else:
+        print "you need to give a question"
+
+if(options.read_database):
+    if(options.query):
+        col = connect("netnography", options.query)
+        with open("result.markdown", "w+") as f:
+            f.write(markdown(col, (lambda: col.find())).encode("utf8"))
+    else:
+        print "you need to give a question"
